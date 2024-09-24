@@ -1,0 +1,84 @@
+int rows = 4;
+int cols = 4;
+int totalCards = rows * cols;
+int[] cardValues = new int[totalCards];
+boolean[] revealed = new boolean[totalCards];
+int firstCard = -1;
+int secondCard = -1;
+boolean checking = false;
+int checkTime = 0;
+
+void setup() {
+  size(400, 400);
+  textAlign(CENTER, CENTER);
+  initializeCards();
+}
+
+void draw() {
+  background(255);
+  displayCards();
+  if (checking && millis() - checkTime > 1000) {
+    checking = false;
+    if (cardValues[firstCard] != cardValues[secondCard]) {
+      revealed[firstCard] = false;
+      revealed[secondCard] = false;
+    }
+    firstCard = -1;
+    secondCard = -1;
+  }
+}
+
+void initializeCards() {
+  for (int i = 0; i < totalCards / 2; i++) {
+    cardValues[i] = i;
+    cardValues[i + totalCards / 2] = i;
+  }
+  for (int i = 0; i < totalCards; i++) {
+    int r = int(random(totalCards));
+    int temp = cardValues[i];
+    cardValues[i] = cardValues[r];
+    cardValues[r] = temp;
+  }
+  for (int i = 0; i < totalCards; i++) {
+    revealed[i] = false;
+  }
+}
+
+void displayCards() {
+  int cardWidth = width / cols;
+  int cardHeight = height / rows;
+  textSize(cardWidth / 3);
+  
+  for (int i = 0; i < totalCards; i++) {
+    int x = (i % cols) * cardWidth;
+    int y = (i / cols) * cardHeight;
+    
+    if (revealed[i]) {
+      fill(0);
+      text(cardValues[i], x + cardWidth / 2, y + cardHeight / 2);
+    } else {
+      fill(200,191,231);
+      rect(x, y, cardWidth, cardHeight);
+    }
+  }
+}
+
+void mousePressed() {
+  if (checking) return;
+  
+  int cardWidth = width / cols;
+  int cardHeight = height / rows;
+  int cardIndex = (mouseX / cardWidth) + (mouseY / cardHeight) * cols;
+  
+  if (!revealed[cardIndex]) {
+    revealed[cardIndex] = true;
+    
+    if (firstCard == -1) {
+      firstCard = cardIndex;
+    } else if (secondCard == -1) {
+      secondCard = cardIndex;
+      checking = true;
+      checkTime = millis();
+    }
+  }
+}
